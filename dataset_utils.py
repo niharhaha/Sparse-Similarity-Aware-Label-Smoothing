@@ -1,0 +1,36 @@
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+def load_dataset(dataset_class, root, ds_mean, ds_std):
+
+    test_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(ds_mean, ds_std),
+        ])
+    if dataset_class == datasets.CIFAR100:
+        train_transform = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(ds_mean, ds_std),
+        ])
+    else:
+        train_transform = test_transform
+
+    train_ds = dataset_class(root=root, train=True, download=True, transform=train_transform)
+    test_ds = dataset_class(root=root, train=False, transform=test_transform)
+
+    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_ds, batch_size=128)
+
+    return train_loader, test_loader
+
+def load_mnist():
+    mean, std = torch.tensor([0.1307]), torch.tensor([0.3081])
+    return load_dataset(dataset_class=datasets.MNIST, root="./data/mnist", ds_mean=mean.tolist(), ds_std=std.tolist())
+
+
+def load_cifar():
+    mean, std = torch.tensor([0.5071, 0.4866, 0.4409]) , torch.tensor([0.2673, 0.2564, 0.2762])
+    return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar", ds_mean=mean.tolist(), ds_std=std.tolist())
