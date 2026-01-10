@@ -3,7 +3,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
 def load_dataset(dataset_class, root, ds_mean, ds_std):
-
     test_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(ds_mean, ds_std),
@@ -34,3 +33,7 @@ def load_mnist():
 def load_cifar():
     mean, std = torch.tensor([0.5071, 0.4866, 0.4409]) , torch.tensor([0.2673, 0.2564, 0.2762])
     return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar", ds_mean=mean.tolist(), ds_std=std.tolist())
+
+def get_data_loaders(dataset):
+    if dataset == "cifar100": return load_cifar()
+    if dataset == "mnist": return load_mnist()
