@@ -29,14 +29,13 @@ def load_mnist():
     mean, std = torch.tensor([0.1307]), torch.tensor([0.3081])
     return load_dataset(dataset_class=datasets.MNIST, root="./data/mnist", ds_mean=mean.tolist(), ds_std=std.tolist())
 
+def load_cifar10():
+    mean, std = torch.tensor([0.5071, 0.4866, 0.4409]) , torch.tensor([0.2673, 0.2564, 0.2762])
+    return load_dataset(dataset_class=datasets.CIFAR10, root="./data/cifar10", ds_mean=mean.tolist(), ds_std=std.tolist())
 
 def load_cifar100():
     mean, std = torch.tensor([0.4914, 0.4822, 0.4465]) , torch.tensor([0.2023, 0.1994, 0.2010])
     return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar100", ds_mean=mean.tolist(), ds_std=std.tolist())
-
-def load_cifar10():
-    mean, std = torch.tensor([0.5071, 0.4866, 0.4409]) , torch.tensor([0.2673, 0.2564, 0.2762])
-    return load_dataset(dataset_class=datasets.CIFAR10, root="./data/cifar10", ds_mean=mean.tolist(), ds_std=std.tolist())
 
 def get_data_loaders(dataset):
     if dataset == "cifar100": return load_cifar100()
