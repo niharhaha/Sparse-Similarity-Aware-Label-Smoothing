@@ -23,3 +23,4 @@ def top_label_ece(logits, labels, n_bins=15):
             ece += (num_in_bin.float() / len(confidences)) * torch.abs(acc_in_bin - conf_in_bin)
 
     return ece.item()
+

@@ -1,5 +1,8 @@
 import torch
 import torch.nn.functional as F
+import numpy as np
+from scipy.stats import spearmanr, wilcoxon
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def top_label_ece(logits, labels, n_bins=15):
     probs = torch.softmax(logits, dim=1)
@@ -42,3 +45,4 @@ def accuracy(model, loader, k = (1, 5)):
             total += y.size(0)
 
     return {key: correct[key] / total for key in k}
+
