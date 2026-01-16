@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 from dataset_utils import get_data_loaders
 import pandas as pd
+import timm
 
 class SmallCNN(nn.Module):
     def __init__(self):
@@ -31,5 +32,23 @@ def CifarResNET18(num_classes):
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
     model.maxpool = nn.Identity()
     model.fc = nn.Linear(model.fc.in_features, num_classes)
+
+    return model
+
+def CifarWideResNET2810(num_classes):
+    model = timm.create_model(
+        "wide_resnet28_10",
+        pretrained=False,
+        num_classes=num_classes
+    )
+
+    return model
+
+def CifarDenseNET121(num_classes):
+    model = models.densenet121(weights = None)
+
+    model.features.conv0 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.features.pool0 = nn.Identity()
+    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
 
     return model
