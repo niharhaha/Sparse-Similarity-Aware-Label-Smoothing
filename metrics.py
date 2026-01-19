@@ -23,6 +23,25 @@ def top_label_ece(logits, labels, n_bins=15):
 
     return ece.item()
 
+def max_calibration_error(logits, labels, n_bins=15):
+    probs = torch.softmax(logits, dim=1)
+    confidences, predictions = probs.max(dim=1)
+    accuracies = predictions.eq(labels)
+
+    ece = torch.zeros(1, device=logits.device)
+    bin_edges = torch.linspace(0, 1, n_bins + 1, device=logits.device)
+
+    for i in range(n_bins):
+        in_bin = (confidences > bin_edges[i]) & (confidences <= bin_edges[i + 1])
+        prop_in_bin = in_bin.float().mean()
+
+        if prop_in_bin > 0:
+            acc_in_bin = accuracies[in_bin].float().mean()
+            conf_in_bin = confidences[in_bin].mean()
+            ece = torch.max(torch.abs(acc_in_bin - conf_in_bin), ece)
+
+    return ece.item()
+
 def nll_loss(logits, labels):
     return F.cross_entropy(logits, labels, reduction="mean").item()
 
