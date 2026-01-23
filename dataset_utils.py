@@ -20,8 +20,8 @@ def load_dataset(dataset_class, root, ds_mean, ds_std):
     train_ds = dataset_class(root=root, train=True, download=True, transform=train_transform)
     test_ds = dataset_class(root=root, train=False, transform=test_transform)
 
-    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=12, pin_memory=True, persistent_workers=True, prefetch_factor=4)
-    test_loader = DataLoader(test_ds, batch_size=128, num_workers=8, pin_memory=True, persistent_workers=True, prefetch_factor=2)
+    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    test_loader = DataLoader(test_ds, batch_size=128, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 
     return train_loader, test_loader
 
@@ -37,7 +37,42 @@ def load_cifar100():
     mean, std = torch.tensor([0.4914, 0.4822, 0.4465]) , torch.tensor([0.2023, 0.1994, 0.2010])
     return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar100", ds_mean=mean.tolist(), ds_std=std.tolist())
 
+def load_tinyimagenet(root="./data/tinyimagenet"):
+    TINY_MEAN = [0.4802, 0.4481, 0.3975]
+    TINY_STD  = [0.2302, 0.2265, 0.2262]
+
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(TINY_MEAN, TINY_STD),
+    ])
+
+    test_transform = transforms.Compose([
+        transforms.Resize(64),
+        transforms.CenterCrop(64),
+        transforms.ToTensor(),
+        transforms.Normalize(TINY_MEAN, TINY_STD),
+    ])
+
+    train_ds = datasets.ImageFolder(
+        root=f"{root}/train",
+        transform=train_transform
+    )
+
+    test_ds = datasets.ImageFolder(
+        root=f"{root}/val",
+        transform=test_transform
+    )
+
+    train_loader = DataLoader(train_ds, batch_size=512, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+
+    test_loader = DataLoader(test_ds, batch_size=1024, shuffle=False, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
+
+    return train_loader, test_loader
+
 def get_data_loaders(dataset):
     if dataset == "cifar100": return load_cifar100()
     if dataset == "mnist": return load_mnist()
     if dataset == "cifar10": return load_cifar10()
+    if dataset == "tinyimagenet": return load_tinyimagenet()
