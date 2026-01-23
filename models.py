@@ -26,7 +26,7 @@ class SmallCNN(nn.Module):
         x = F.relu(self.fc1(x))
         return self.fc2(x)
     
-def CifarResNET18(num_classes):
+def CifarResNet18(num_classes):
     model = models.resnet18(weights = None)
 
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
@@ -35,20 +35,27 @@ def CifarResNET18(num_classes):
 
     return model
 
-def CifarWideResNET2810(num_classes):
+def CifarDenseNet121(num_classes):
     model = timm.create_model(
-        "wide_resnet28_10",
+        "densenet121",
         pretrained=False,
-        num_classes=num_classes
+        num_classes=num_classes,
+        img_size=32
+    )
+    return model
+
+def TinyResNet50(num_classes):
+    return timm.create_model(
+        "resnet50",
+        pretrained=False,
+        num_classes=num_classes,
+        img_size=64
     )
 
-    return model
-
-def CifarDenseNET121(num_classes):
-    model = models.densenet121(weights = None)
-
-    model.features.conv0 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-    model.features.pool0 = nn.Identity()
-    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
-
-    return model
+def TinyDenseNet121(num_classes):
+    return timm.create_model(
+        "densenet121",
+        pretrained=False,
+        num_classes=num_classes,
+        img_size=64
+    )
