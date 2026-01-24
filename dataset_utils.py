@@ -110,13 +110,15 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
         root=f"{root}/train",
         transform=train_transform
     )
+    train_classes = train_ds.class_to_idx
 
     test_ds = datasets.ImageFolder(
         root=f"{root}/val",
         transform=test_transform
     )
+    test_ds.class_to_idx = train_classes
 
-    train_loader = DataLoader(train_ds, batch_size=512, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
 
     test_loader = DataLoader(test_ds, batch_size=1024, shuffle=False, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 

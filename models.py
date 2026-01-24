@@ -39,18 +39,22 @@ def CifarDenseNet121(num_classes):
     model = timm.create_model(
         "densenet121",
         pretrained=False,
-        num_classes=num_classes,
-        img_size=32
+        num_classes=num_classes
     )
     return model
 
-def TinyResNet50(num_classes):
-    return timm.create_model(
-        "resnet50",
+def TinyResNet34(num_classes):
+    model = timm.create_model(
+        "resnet34",
         pretrained=False,
-        num_classes=num_classes,
-        img_size=64
+        num_classes=num_classes
     )
+    model.conv1 = torch.nn.Conv2d(
+        3, 64, kernel_size=3, stride=1, padding=1, bias=False
+    )
+    model.maxpool = torch.nn.Identity()
+    return model
+
 
 def TinyDenseNet121(num_classes):
     return timm.create_model(
