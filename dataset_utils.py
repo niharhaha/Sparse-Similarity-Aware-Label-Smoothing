@@ -1,3 +1,7 @@
+import os
+import shutil
+import urllib.request
+import zipfile
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -37,7 +41,54 @@ def load_cifar100():
     mean, std = torch.tensor([0.4914, 0.4822, 0.4465]) , torch.tensor([0.2023, 0.1994, 0.2010])
     return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar100", ds_mean=mean.tolist(), ds_std=std.tolist())
 
+def _prepare_tinyimagenet(root):
+    target_dir = os.path.join(root, "tinyimagenet")
+    zip_path = os.path.join(root, "tiny-imagenet-200.zip")
+
+    if not os.path.exists(target_dir):
+        os.makedirs(root, exist_ok=True)
+        print("Downloading TinyImageNet...")
+        urllib.request.urlretrieve(
+            "https://cs231n.stanford.edu/tiny-imagenet-200.zip",
+            zip_path
+        )
+
+        print("Unzipping...")
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(root)
+
+        os.rename(
+            os.path.join(root, "tiny-imagenet-200"),
+            target_dir
+        )
+        os.remove(zip_path)
+
+    # ---- fix val folder ----
+    val_dir = os.path.join(target_dir, "val")
+    images_dir = os.path.join(val_dir, "images")
+    ann_path = os.path.join(val_dir, "val_annotations.txt")
+
+    if os.path.exists(images_dir):
+        print("Fixing TinyImageNet val split...")
+
+        with open(ann_path, "r") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            img, cls = line.split("\t")[:2]
+            cls_dir = os.path.join(val_dir, cls)
+            os.makedirs(cls_dir, exist_ok=True)
+            shutil.move(
+                os.path.join(images_dir, img),
+                os.path.join(cls_dir, img)
+            )
+
+        shutil.rmtree(images_dir)
+        print("Val split fixed.")
+
 def load_tinyimagenet(root="./data/tinyimagenet"):
+    _prepare_tinyimagenet("./data")
+
     TINY_MEAN = [0.4802, 0.4481, 0.3975]
     TINY_STD  = [0.2302, 0.2265, 0.2262]
 
