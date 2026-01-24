@@ -93,7 +93,7 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
     TINY_STD  = [0.2302, 0.2265, 0.2262]
 
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
+        transforms.RandomResizedCrop(64, scale=(0.6, 1.0)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(TINY_MEAN, TINY_STD),
@@ -116,9 +116,13 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
         root=f"{root}/val",
         transform=test_transform
     )
+    test_ds.targets = [
+        train_classes[test_ds.classes[t]]
+        for t in test_ds.targets
+    ]
     test_ds.class_to_idx = train_classes
 
-    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, num_workers=24, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=4)
 
     test_loader = DataLoader(test_ds, batch_size=1024, shuffle=False, num_workers=8, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 

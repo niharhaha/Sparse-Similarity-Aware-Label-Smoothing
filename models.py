@@ -63,3 +63,10 @@ def TinyDenseNet121(num_classes):
         num_classes=num_classes,
         img_size=64
     )
+
+def TinyEfficientNet(num_classes):
+    return timm.create_model(
+        "efficientnet_b0", 
+        pretrained=False, 
+        num_classes=num_classes
+    )
