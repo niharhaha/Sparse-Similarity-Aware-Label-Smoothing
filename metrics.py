@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from scipy.stats import spearmanr, wilcoxon
+from torch.amp import autocast
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def calibration_errors(logits, labels, n_bins=15):
@@ -41,8 +42,10 @@ def accuracy(model, loader, k = (1, 5)):
 
     with torch.no_grad():
         for x, y in loader:
-            x, y = x.to(device), y.to(device)
-            outputs = model(x)
+            x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+
+            with autocast(device_type="cuda", dtype=torch.bfloat16):
+                outputs = model(x)
 
             _, pred = outputs.topk(maxk, dim=1, largest=True, sorted=True)
 
@@ -51,4 +54,3 @@ def accuracy(model, loader, k = (1, 5)):
             total += y.size(0)
 
     return {key: correct[key] / total for key in k}
-

@@ -24,8 +24,8 @@ def load_dataset(dataset_class, root, ds_mean, ds_std):
     train_ds = dataset_class(root=root, train=True, download=True, transform=train_transform)
     test_ds = dataset_class(root=root, train=False, transform=test_transform)
 
-    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
-    test_loader = DataLoader(test_ds, batch_size=128, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
+    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=20, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    test_loader = DataLoader(test_ds, batch_size=128, num_workers=12, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 
     return train_loader, test_loader
 
@@ -116,9 +116,9 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
         transform=test_transform
     )
 
-    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=20, pin_memory=True, persistent_workers=True, prefetch_factor=4)
 
-    test_loader = DataLoader(test_ds, batch_size=512, shuffle=False, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
+    test_loader = DataLoader(test_ds, batch_size=512, shuffle=False, num_workers=12, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 
     return train_loader, test_loader
 
