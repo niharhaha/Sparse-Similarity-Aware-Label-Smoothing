@@ -26,7 +26,7 @@ class SmallCNN(nn.Module):
         x = F.relu(self.fc1(x))
         return self.fc2(x)
     
-def CifarResNet18(num_classes):
+def ResNet18(num_classes):
     model = models.resnet18(weights = None)
 
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)

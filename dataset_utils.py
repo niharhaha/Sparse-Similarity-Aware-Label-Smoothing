@@ -116,9 +116,9 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
         transform=test_transform
     )
 
-    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    train_loader = DataLoader(train_ds, batch_size=128, shuffle=True, num_workers=32, pin_memory=True, persistent_workers=True, prefetch_factor=4)
 
-    test_loader = DataLoader(test_ds, batch_size=512, shuffle=False, num_workers=8, pin_memory=True, persistent_workers=True, prefetch_factor=2)
+    test_loader = DataLoader(test_ds, batch_size=512, shuffle=False, num_workers=16, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 
     return train_loader, test_loader
 
