@@ -122,8 +122,109 @@ def load_tinyimagenet(root="./data/tinyimagenet"):
 
     return train_loader, test_loader
 
+def compute_inaturalist_mean_std(
+    root="./data/inaturalist",
+    batch_size=256,
+    num_workers=8,
+):
+    ds = datasets.INaturalist(
+        root=root,
+        version="2021_train_mini",
+        target_type="full",
+        download=True,
+        transform=transforms.ToTensor(),
+    )
+
+    loader = DataLoader(
+        ds,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=(num_workers > 0),
+    )
+
+    channel_sum = torch.zeros(3)
+    channel_sq_sum = torch.zeros(3)
+    num_pixels = 0
+
+    for x, _ in loader:
+        b, c, h, w = x.shape
+        pixels_per_batch = b * h * w
+
+        channel_sum += x.sum(dim=(0, 2, 3))
+        channel_sq_sum += (x ** 2).sum(dim=(0, 2, 3))
+        num_pixels += pixels_per_batch
+
+    mean = channel_sum / num_pixels
+    std = torch.sqrt(channel_sq_sum / num_pixels - mean ** 2)
+
+    return mean, std
+
+def load_inaturalist(
+    root="./data/inaturalist",
+    image_size=160,
+    batch_size=128,
+    num_workers=8,
+):
+    mean, std = torch.tensor([_, _, _]) , torch.tensor([_, _, _])
+    mean, std = mean.tolist(), std.tolist()
+
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(image_size),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    test_transform = transforms.Compose([
+        transforms.Resize(int(image_size * 1.15)),
+        transforms.CenterCrop(image_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    train_ds = datasets.INaturalist(
+        root=root,
+        version="2021_train_mini",
+        target_type="full",
+        download=True,
+        transform=train_transform,
+    )
+
+    test_ds = datasets.INaturalist(
+        root=root,
+        version="2021_valid",
+        target_type="full",
+        download=True,
+        transform=test_transform,
+    )
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=(num_workers > 0),
+        prefetch_factor=4 if num_workers > 0 else None,
+    )
+
+    test_loader = DataLoader(
+        test_ds,
+        batch_size=512,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=(num_workers > 0),
+        prefetch_factor=2 if num_workers > 0 else None,
+    )
+
+    return train_loader, test_loader
+
 def get_data_loaders(dataset):
     if dataset == "cifar100": return load_cifar100()
     if dataset == "mnist": return load_mnist()
     if dataset == "cifar10": return load_cifar10()
     if dataset == "tinyimagenet": return load_tinyimagenet()
+    if dataset == "inat": return load_inaturalist()

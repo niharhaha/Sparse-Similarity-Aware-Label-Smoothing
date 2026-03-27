@@ -64,9 +64,8 @@ def TinyDenseNet121(num_classes):
         img_size=64
     )
 
-def TinyEfficientNet(num_classes):
-    return timm.create_model(
-        "efficientnet_b0", 
-        pretrained=False, 
-        num_classes=num_classes
-    )
+def EfficientNetB0(num_classes):
+    return models.efficientnet_b0(weights = None, num_classes=num_classes)
+
+def MobileNetV3Large(num_classes):
+    return models.mobilenet_v3_large(weights = None, num_classes=num_classes)
