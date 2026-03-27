@@ -6,18 +6,28 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-def load_dataset(dataset_class, root, ds_mean, ds_std):
-    test_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(ds_mean, ds_std),
-        ])
+def load_dataset(dataset_class, root, ds_mean, ds_std, normalize):
+    test_transform_list = [
+        transforms.ToTensor(),
+    ]
+
+    if normalize:
+        test_transform_list.append(transforms.Normalize(ds_mean, ds_std))
+
+    test_transform = transforms.Compose(test_transform_list)
+
+
     if dataset_class == datasets.CIFAR100:
-        train_transform = transforms.Compose([
+        train_transform_list = [
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(ds_mean, ds_std),
-        ])
+        ]
+
+        if normalize:
+            train_transform_list.append(transforms.Normalize(ds_mean, ds_std))
+
+        train_transform = transforms.Compose(train_transform_list)
     else:
         train_transform = test_transform
 
@@ -29,17 +39,17 @@ def load_dataset(dataset_class, root, ds_mean, ds_std):
 
     return train_loader, test_loader
 
-def load_mnist():
+def load_mnist(normalize = True):
     mean, std = torch.tensor([0.1307]), torch.tensor([0.3081])
-    return load_dataset(dataset_class=datasets.MNIST, root="./data/mnist", ds_mean=mean.tolist(), ds_std=std.tolist())
+    return load_dataset(dataset_class=datasets.MNIST, root="./data/mnist", ds_mean=mean.tolist(), ds_std=std.tolist(), normalize=normalize)
 
-def load_cifar10():
+def load_cifar10(normalize = True):
     mean, std = torch.tensor([0.5071, 0.4866, 0.4409]) , torch.tensor([0.2673, 0.2564, 0.2762])
-    return load_dataset(dataset_class=datasets.CIFAR10, root="./data/cifar10", ds_mean=mean.tolist(), ds_std=std.tolist())
+    return load_dataset(dataset_class=datasets.CIFAR10, root="./data/cifar10", ds_mean=mean.tolist(), ds_std=std.tolist(), normalize=normalize)
 
-def load_cifar100():
+def load_cifar100(normalize = True):
     mean, std = torch.tensor([0.4914, 0.4822, 0.4465]) , torch.tensor([0.2023, 0.1994, 0.2010])
-    return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar100", ds_mean=mean.tolist(), ds_std=std.tolist())
+    return load_dataset(dataset_class=datasets.CIFAR100, root="./data/cifar100", ds_mean=mean.tolist(), ds_std=std.tolist(), normalize=normalize)
 
 def _prepare_tinyimagenet(root):
     target_dir = os.path.join(root, "tinyimagenet")
@@ -86,25 +96,31 @@ def _prepare_tinyimagenet(root):
         shutil.rmtree(images_dir)
         print("Val split fixed.")
 
-def load_tinyimagenet(root="./data/tinyimagenet"):
+def load_tinyimagenet(root="./data/tinyimagenet", normalize=True):
     _prepare_tinyimagenet("./data")
 
     TINY_MEAN = [0.4802, 0.4481, 0.3975]
     TINY_STD  = [0.2302, 0.2265, 0.2262]
 
-    train_transform = transforms.Compose([
+    train_transform_list = [
         transforms.RandomCrop(64, padding=8),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(TINY_MEAN, TINY_STD),
-    ])
+    ]
 
-    test_transform = transforms.Compose([
+    if normalize:
+        train_transform_list.append(transforms.Normalize(TINY_MEAN, TINY_STD))
+    train_transform = transforms.Compose(train_transform_list)
+
+    test_transform_list = [
         transforms.Resize(64),
         transforms.CenterCrop(64),
         transforms.ToTensor(),
-        transforms.Normalize(TINY_MEAN, TINY_STD),
-    ])
+    ]
+
+    if normalize:
+        test_transform_list.append(transforms.Normalize(TINY_MEAN, TINY_STD))
+    test_transform = transforms.Compose(test_transform_list)
 
     train_ds = datasets.ImageFolder(
         root=f"{root}/train",
@@ -222,9 +238,9 @@ def load_inaturalist(
 
     return train_loader, test_loader
 
-def get_data_loaders(dataset):
-    if dataset == "cifar100": return load_cifar100()
-    if dataset == "mnist": return load_mnist()
-    if dataset == "cifar10": return load_cifar10()
-    if dataset == "tinyimagenet": return load_tinyimagenet()
-    if dataset == "inat": return load_inaturalist()
+def get_data_loaders(dataset, normalize = True):
+    if dataset == "cifar100": return load_cifar100(normalize=normalize)
+    if dataset == "mnist": return load_mnist(normalize=normalize)
+    if dataset == "cifar10": return load_cifar10(normalize=normalize)
+    if dataset == "tinyimagenet": return load_tinyimagenet(normalize=normalize)
+    if dataset == "inat": return load_inaturalist(normalize=normalize)
